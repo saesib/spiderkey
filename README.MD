@@ -71,10 +71,8 @@ If a **seed** is used, the generator deterministically derives the salt and conf
 ## 🧪 Planned Features
 
 - [ ] GUI support (desktop app version)
-- [ ] Filename encryption
-- [ ] Secure file wiping (post-decryption)
+- [ ] Optional file shredding: auto-destroy plaintext files after decryption
 - [ ] SpiderKey relocation with automatic secure deletion of previous copies
-- [ ] Shredding of unencypted data after encryption.
 
 ---
 
