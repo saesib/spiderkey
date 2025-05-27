@@ -1,0 +1,25 @@
+SpiderKey - Source-Available Personal Use License
+
+Copyright © 2025 saesib
+All rights reserved.
+
+This software, including its source code, is provided as source-available. You are granted permission to use SpiderKey for personal, non-commercial purposes only, under the terms described below.
+
+You may:
+
+- Use the SpiderKey Generator to create your own SpiderKey programs for encrypting and decrypting your personal data.
+- Run SpiderKey and its related tools as provided for their intended purpose.
+- View the source code for educational and transparency purposes.
+
+You may NOT:
+
+- Copy, modify, fork, or redistribute the source code or compiled binaries of SpiderKey or any generated SpiderKey programs.
+- Use any part of the SpiderKey source code or binaries in your own projects, whether commercial or non-commercial.
+- Reverse engineer, decompile, or disassemble SpiderKey or any generated SpiderKey programs.
+- Sell, rent, sublicense, or otherwise make SpiderKey available as part of a service or product.
+
+SpiderKey is provided “as is,” without warranty of any kind. The author is not liable for any damages, data loss, or consequences resulting from the use or misuse of this software.
+
+Use of this software constitutes acceptance of these terms.
+
+If you are interested in commercial licensing or written permission for other uses, contact the author.
