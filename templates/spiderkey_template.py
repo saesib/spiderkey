@@ -7,6 +7,7 @@ from spiderkey_core.crypto_utils import derive_key, decrypt_key
 from spiderkey_core.file_utils import encrypt_file, decrypt_file, generate_random_name
 from spiderkey_core.loader import Loader
 
+import os
 import base64
 from getpass import getpass
 from pathlib import Path
@@ -99,10 +100,14 @@ Available commands:
             aes_key = prompt_password_and_decrypt_key()
             if aes_key is None:
                 continue  # Skip encryption if key couldn't be decrypted after retries
-            try:
+            loader = Loader("Encrypting")
+            loader.start()
+            try:                
                 encrypt_file(input_dir, str(output_path), aes_key)
+                loader.stop()
                 print(f"Encrypted to {output_path}")
             except Exception as e:
+                loader.stop()
                 print(f"Encryption failed: {e}")
 
         elif command.startswith("d "):
@@ -116,10 +121,14 @@ Available commands:
             aes_key = prompt_password_and_decrypt_key()
             if aes_key is None:
                 continue  # Skip decryption if key couldn't be decrypted after retries
+            loader = Loader("Decrypting")
+            loader.start()
             try:
                 decrypt_file(input_file, extract_to, aes_key)
+                loader.stop()
                 print(f"Decrypted contents extracted to: {extract_to.resolve()}")
             except Exception as e:
+                loader.stop()
                 print("Decryption failed:", e)
 
         elif command == "e" or command == "d":
