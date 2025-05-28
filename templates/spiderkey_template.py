@@ -6,6 +6,8 @@ This file will be compiled into a standalone key program.
 from spiderkey_core.crypto_utils import derive_key, decrypt_key
 from spiderkey_core.file_utils import encrypt_file, decrypt_file, generate_random_name
 from spiderkey_core.loader import Loader
+from spiderkey_core.shredder import Shredder
+
 
 import os
 import base64
@@ -31,7 +33,9 @@ def prompt_password_and_decrypt_key() -> bytes | None:
     print("Too many failed attempts. Returning to menu.")
     return None
 
-
+# TODO: add seeds for key generation
+# TODO: add optional shredding as a command line argument
+# TODO: add additional check if user wants to shred files after command shred command
 def main():
     spider_art = r'''
 ###############################################################
@@ -66,10 +70,11 @@ def main():
         elif command.lower() == "help":
             print("""
 Available commands:
-  e <folder>         Encrypt a folder
-  d <file.spdr>      Decrypt an encrypted file
-  help               Show this help message
-  quit / q / exit    Exit the program
+  e <folder>            Encrypt a folder
+  d <file.spdr>         Decrypt an encrypted file
+  shred <file|folder>   Securely delete a file or folder
+  help                  Show this help message
+  quit / q / exit       Exit the program
 """)
 
         elif command.startswith("e "):
@@ -106,9 +111,26 @@ Available commands:
                 encrypt_file(input_dir, str(output_path), aes_key)
                 loader.stop()
                 print(f"Encrypted to {output_path}")
+                while True:
+                    choice = input("Do you want to shred the decrypted file? (y/n): ").strip().lower()
+                    if choice == 'y':
+                        shredder = Shredder()
+                        loader = Loader("Shredding")
+                        loader.start()
+                        shredder.shred_file(input_file)
+                        loader.stop()
+                        print("Decrypted file securely deleted.")
+                        break
+                    elif choice == 'n':
+                        print("Decrypted file retained.")
+                        break
+                    else:
+                        print("Invalid choice. Please enter 'y' or 'n'.")
+                        continue
             except Exception as e:
                 loader.stop()
                 print(f"Encryption failed: {e}")
+            
 
         elif command.startswith("d "):
             parts = command.split(maxsplit=1)
@@ -127,9 +149,51 @@ Available commands:
                 decrypt_file(input_file, extract_to, aes_key)
                 loader.stop()
                 print(f"Decrypted contents extracted to: {extract_to.resolve()}")
+                while True:
+                    choice = input("Do you want to shred the encrypted file? (y/n): ").strip().lower()
+                    if choice == 'y':
+                        shredder = Shredder()
+                        loader = Loader("Shredding")
+                        loader.start()
+                        shredder.shred_file(input_file)
+                        loader.stop()
+                        print("Encrypted file securely deleted.")
+                        break
+                    elif choice == 'n':
+                        print("Encrypted file retained.")
+                        break
+                    else:
+                        print("Invalid choice. Please enter 'y' or 'n'.")
+                        continue
             except Exception as e:
                 loader.stop()
                 print("Decryption failed:", e)
+        
+        elif command.startswith("shred "):
+            parts = command.split(maxsplit=1)
+            if len(parts) < 2:
+                print("Missing argument. Use 'shred <file>' or 'shred <folder>'.")
+                continue
+            
+            target = parts[1]
+            shredder = Shredder()
+            try:
+                if os.path.isfile(target):
+                    loader = Loader("Shredding")
+                    loader.start()
+                    shredder.shred_file(target)
+                    loader.stop()
+                    print(f"File '{target}' securely deleted.")
+                elif os.path.isdir(target):
+                    loader = Loader("Shredding")
+                    loader.start()
+                    shredder.shred_directory(target)
+                    loader.stop()
+                    print(f"Directory '{target}' securely deleted.")
+                else:
+                    print(f"'{target}' is neither a file nor a directory.")
+            except Exception as e:
+                print(f"Shredding failed: {e}")
 
         elif command == "e" or command == "d":
             print("Missing argument. Use 'e <folder>' or 'd <file>'.")

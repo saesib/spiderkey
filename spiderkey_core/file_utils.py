@@ -7,7 +7,7 @@ import string
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 CHUNK_SIZE = 1024 * 1024 * 64  # 64 MB
-
+# TODO: allow for encryption of single files, not just directories
 def encrypt_file(input_dir: str, output_file: str, key: bytes):
     temp_zip_path = Path(tempfile.gettempdir()) / (next(tempfile._get_candidate_names()) + ".zip")
 
