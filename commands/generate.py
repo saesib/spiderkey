@@ -1,4 +1,4 @@
-from builder.package import create_spiderkey
+from builder.keybuilder import create_spiderkey
 
 def run(name, password, seed=None):
     print(f"Creating SpiderKey '{name}'")

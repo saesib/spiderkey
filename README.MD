@@ -91,4 +91,4 @@ See [LICENSE.txt](./LICENSE.txt) for the full legal terms.
 
 For commercial licensing or permission requests, contact:  
 `[saeberg01@gmail.com]`  
-Copyright © 2025 [Your Name]
+Copyright © 2025 saesib

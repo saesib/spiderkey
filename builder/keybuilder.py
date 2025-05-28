@@ -4,22 +4,11 @@ import hashlib
 import tempfile
 import subprocess
 from pathlib import Path
-from argon2.low_level import hash_secret_raw, Type
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+from spiderkey_core.crypto_utils import derive_key
+
 TEMPLATE_PATH = "templates/spiderkey_template.py"
-
-def derive_key(password: str, salt: bytes) -> bytes:
-    return hash_secret_raw(
-        secret=password.encode(),
-        salt=salt,
-        time_cost=4,
-        memory_cost=65536,
-        parallelism=2,
-        hash_len=32,
-        type=Type.I
-    )
-
 
 def encrypt_key(aes_key: bytes, kek: bytes) -> bytes:
     aesgcm = AESGCM(kek)
@@ -63,11 +52,17 @@ def create_spiderkey(name: str, password: str, seed: str = None):
     with open(temp_py, "w", encoding="utf-8") as f:
         f.write(filled_code)
 
+
+    existing_exe = Path("dist") / f"{name}.exe"
+    if existing_exe.exists():
+        existing_exe.unlink()
     # 9. Compile to binary using PyInstaller
     subprocess.run([
         "pyinstaller",
         "--onefile",
         "--name", name,
+        "--distpath", "dist",
+        "--path", ".",
         str(temp_py)
     ])
 
