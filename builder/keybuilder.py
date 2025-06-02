@@ -68,6 +68,11 @@ def create_spiderkey(name: str, password: str, seed: str = None):
         "--name", name,
         "--distpath", str(output_dir),
         "--path", ".",
+        "--hidden-import=argon2.low_level",  # needed for key derivation on  linux based systems
+        "--hidden-import=spiderkey_core.crypto_utils",
+        "--hidden-import=spiderkey_core.file_utils",
+        "--hidden-import=spiderkey_core.loader",
+        "--hidden-import=spiderkey_core.shredder",
         str(temp_py)
     ])
 
