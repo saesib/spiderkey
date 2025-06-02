@@ -55,7 +55,10 @@ def create_spiderkey(name: str, password: str, seed: str = None):
         f.write(filled_code)
 
 
-    existing_exe = Path("dist") / f"{name}.exe"
+    output_dir = Path("spiderkeys")
+    output_dir.mkdir(exist_ok=True)
+
+    existing_exe = output_dir / f"{name}.exe"
     if existing_exe.exists():
         existing_exe.unlink()
     # 9. Compile to binary using PyInstaller
@@ -63,7 +66,7 @@ def create_spiderkey(name: str, password: str, seed: str = None):
         "pyinstaller",
         "--onefile",
         "--name", name,
-        "--distpath", "dist",
+        "--distpath", str(output_dir),
         "--path", ".",
         str(temp_py)
     ])
