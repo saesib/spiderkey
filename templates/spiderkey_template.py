@@ -33,7 +33,7 @@ def prompt_password_and_decrypt_key() -> bytes | None:
     print("Too many failed attempts. Returning to menu.")
     return None
 
-# TODO: add seeds for key generation
+# TODO: change generated keys path
 # TODO: add optional shredding as a command line argument
 # TODO: add additional check if user wants to shred files after command shred command
 def main():
@@ -70,18 +70,18 @@ def main():
         elif command.lower() == "help":
             print("""
 Available commands:
-  e <folder>            Encrypt a folder
+  e <file|folder>       Encrypt a folder
   d <file.spdr>         Decrypt an encrypted file
-  shred <file|folder>   Securely delete a file or folder
+  s <file|folder>       Securely delete a file or folder
   help                  Show this help message
   quit / q / exit       Exit the program
 """)
 
         elif command.startswith("e "):
             parts = command.split(maxsplit=1)
-            input_dir = parts[1]
-            if not os.path.isdir(input_dir):
-                print(f"Folder '{input_dir}' does not exist.")
+            input_dir = parts[1].strip('\'"')
+            if not os.path.exists(input_dir):
+                print(f"File or folder '{input_dir}' does not exist.")
                 continue
 
             raw_name = input("Output file name (leave blank for random): ").strip()
@@ -135,9 +135,15 @@ Available commands:
         elif command.startswith("d "):
             parts = command.split(maxsplit=1)
             input_file = parts[1]
+            # Try the exact filename first
             if not os.path.isfile(input_file):
-                print(f"File '{input_file}' does not exist.")
-                continue
+                # Try adding .spdr if not found
+                if os.path.isfile(input_file + ".spdr"):
+                    input_file += ".spdr"
+                    print(f"Using file: {input_file}")
+                else:
+                    print(f"File '{input_file}' does not exist.")
+                    continue
             
             extract_to = Path(input_file).parent  # current directory or same location as the encrypted file
             aes_key = prompt_password_and_decrypt_key()
@@ -169,13 +175,24 @@ Available commands:
                 loader.stop()
                 print("Decryption failed:", e)
         
-        elif command.startswith("shred "):
+        elif command.startswith("s "):
             parts = command.split(maxsplit=1)
             if len(parts) < 2:
                 print("Missing argument. Use 'shred <file>' or 'shred <folder>'.")
                 continue
             
             target = parts[1]
+
+            if not os.path.exists(target):
+                print(f"'{target}' does not exist.")
+                continue
+            
+            print("WARNING: Shredding will permanently destroy the file or folder and it cannot be recovered.")
+            confirm = input(f"Are you sure you want to shred '{target}'? (y/n): ").strip().lower()
+            if confirm != 'y':
+                print("Shredding cancelled.")
+                continue
+            
             shredder = Shredder()
             try:
                 if os.path.isfile(target):

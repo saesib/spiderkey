@@ -7,18 +7,22 @@ import string
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 CHUNK_SIZE = 1024 * 1024 * 64  # 64 MB
-# TODO: allow for encryption of single files, not just directories
-def encrypt_file(input_dir: str, output_file: str, key: bytes):
+
+def encrypt_file(input_path: str, output_file: str, key: bytes):
+    input_path = Path(input_path)
     temp_zip_path = Path(tempfile.gettempdir()) / (next(tempfile._get_candidate_names()) + ".zip")
 
-    # Create ZIP
+    # Create ZIP from either a single file or a directory
     with ZipFile(temp_zip_path, 'w') as zipf:
-        base_dir = os.path.basename(input_dir.rstrip("/\\"))
-        for root, _, files in os.walk(input_dir):
-            for file in files:
-                filepath = os.path.join(root, file)
-                arcname = os.path.join(base_dir, os.path.relpath(filepath, input_dir))
-                zipf.write(filepath, arcname=arcname)
+        if input_path.is_file():
+            zipf.write(input_path, arcname=input_path.name)
+        else:
+            base_dir = input_path.name
+            for root, _, files in os.walk(input_path):
+                for file in files:
+                    filepath = os.path.join(root, file)
+                    arcname = os.path.join(base_dir, os.path.relpath(filepath, input_path))
+                    zipf.write(filepath, arcname=arcname)
 
     aesgcm = AESGCM(key)
 
@@ -40,6 +44,9 @@ def encrypt_file(input_dir: str, output_file: str, key: bytes):
     os.unlink(temp_zip_path)
 
 def decrypt_file(input_file: str, output_dir: str, key: bytes):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     temp_zip_path = Path(tempfile.gettempdir()) / (next(tempfile._get_candidate_names()) + ".zip")
     aesgcm = AESGCM(key)
 
@@ -69,8 +76,22 @@ def decrypt_file(input_file: str, output_dir: str, key: bytes):
     try:
         with ZipFile(temp_zip_path, 'r') as zipf:
             zipf.extractall(output_dir)
-    except Exception:
-        print("Failed to unzip decrypted data.")
+
+            # Optional: if there's only one file in zip, move it directly out
+            zip_contents = zipf.namelist()
+            if len(zip_contents) == 1:
+                extracted = output_dir / zip_contents[0]
+                new_path = output_dir / Path(zip_contents[0]).name
+                extracted.rename(new_path)
+                sub_dir = extracted.parent
+                if sub_dir != output_dir and sub_dir.exists():
+                    try:
+                        sub_dir.rmdir()  # Only works if empty
+                    except OSError:
+                        pass
+
+    except Exception as e:
+        print("Failed to unzip decrypted data:", e)
     finally:
         os.unlink(temp_zip_path)
 
