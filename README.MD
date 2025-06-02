@@ -19,12 +19,25 @@ SpiderKey supports **seed-based generation**: enter the same seed and password, 
 
 ## ⚠️ IMPORTANT: Read This First
 
-SpiderKey is built around the principle of **zero trust** and **irrecoverable encryption**.  
+SpiderKey is an experimental encryption tool intended primarily for **educational and personal use**.  
+It is built around the principle of **zero trust** and **irrecoverable encryption**.
+
 That means:
 
 - If you **lose your SpiderKey** or **forget the password**, your data is **gone forever**.
 - There is **no cloud**, **no backup**, and **no recovery mechanism**.
 - You **must protect your SpiderKey binary and your password** with the same care you protect your encrypted files.
+
+---
+
+### ⚠️ Security Disclaimer
+
+SpiderKey is currently under development and has **not undergone professional security auditing**.  
+While it uses strong cryptographic standards (AES-256-GCM, Argon2), no software is secure unless independently reviewed.
+
+Do **not** use SpiderKey for real-world high-stakes or sensitive data unless:
+- You fully understand the implications of irreversible encryption
+- The code has been **independently audited** by qualified professionals
 
 ---
 
