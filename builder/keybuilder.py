@@ -18,13 +18,15 @@ def encrypt_key(aes_key: bytes, kek: bytes) -> bytes:
 
 def create_spiderkey(name: str, password: str, seed: str = None):
     # 1. Generate or derive salt
-    if seed:
-        salt = hashlib.sha256(seed.encode()).digest()[:16]
-    else:
-        salt = os.urandom(16)
+    salt = os.urandom(16)
 
     # 2. Generate AES key
-    aes_key = os.urandom(32)
+    if seed:
+        # If a seed is provided, use it to generate a consistent AES key
+        aes_key = hashlib.sha256((seed + password).encode()).digest()[:32]
+    else:
+        # Otherwise, generate a random AES key
+        aes_key = os.urandom(32)
 
     # 3. Derive KEK from password + salt
     kek = derive_key(password, salt)

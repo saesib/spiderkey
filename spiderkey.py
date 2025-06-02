@@ -17,7 +17,6 @@ def main():
     args = parser.parse_args()
 
     if args.command == "generate":
-        print(f"Generating SpiderKey with name: {args.name}, password: {args.password}, seed: {args.seed}")
         generate.run(name=args.name, password=args.password, seed=args.seed)
     else:
         parser.print_help()
