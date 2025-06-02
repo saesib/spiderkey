@@ -1,0 +1,6 @@
+# Core dependencies
+cryptography>=42.0.0  # For AES-GCM encryption
+argon2-cffi>=23.1.0   # For password hashing and key derivation
+
+# Build dependencies
+pyinstaller>=6.3.0    # For creating standalone executables
