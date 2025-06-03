@@ -33,9 +33,32 @@ def prompt_password_and_decrypt_key() -> bytes | None:
     print("Too many failed attempts. Returning to menu.")
     return None
 
-# TODO: change generated keys path
-# TODO: add optional shredding as a command line argument
-# TODO: add additional check if user wants to shred files after command shred command
+def shred(file_or_folder: str):
+    shredder = Shredder()
+    loader = Loader("Shredding")
+    loader.start()
+
+    try:
+        if os.path.isfile(file_or_folder):
+            shredder.shred_file(file_or_folder)
+        else:
+            shredder.shred_directory(file_or_folder)
+        loader.stop()
+        print(f"'{file_or_folder}' has been securely deleted.")
+    except (FileNotFoundError, IsADirectoryError, NotADirectoryError) as e:
+        loader.stop()
+        print(str(e))
+    except Exception as e:
+        loader.stop()
+        print(f"Shredding failed: {e}")
+
+def path_completer(text, state):
+    matches = glob.glob(text + '*')
+    if state < len(matches):
+        return matches[state]
+    return None
+
+
 def main():
     spider_art = r'''
 ###############################################################
@@ -59,6 +82,7 @@ def main():
     print(spider_art)
     print("Welcome to your SpiderKey. Type 'help' for available commands.")
 
+    # Main loop for command input
     while True:
         command = input("> ").strip()
 
@@ -73,6 +97,10 @@ Available commands:
   e <file|folder>       Encrypt a folder
   d <file.spdr>         Decrypt an encrypted file
   s <file|folder>       Securely delete a file or folder
+  cd <path>             Change working directory (supports '/' and '\\')
+  pwd                   Show current working directory
+  ls                    List contents of current directory
+  clear                 Clear the screen and redraw SpiderKey banner
   help                  Show this help message
   quit / q / exit       Exit the program
 """)
@@ -114,12 +142,7 @@ Available commands:
                 while True:
                     choice = input("Do you want to shred the decrypted file? (y/n): ").strip().lower()
                     if choice == 'y':
-                        shredder = Shredder()
-                        loader = Loader("Shredding")
-                        loader.start()
-                        shredder.shred_file(input_file)
-                        loader.stop()
-                        print("Decrypted file securely deleted.")
+                        shred(input_dir)
                         break
                     elif choice == 'n':
                         print("Decrypted file retained.")
@@ -158,12 +181,7 @@ Available commands:
                 while True:
                     choice = input("Do you want to shred the encrypted file? (y/n): ").strip().lower()
                     if choice == 'y':
-                        shredder = Shredder()
-                        loader = Loader("Shredding")
-                        loader.start()
-                        shredder.shred_file(input_file)
-                        loader.stop()
-                        print("Encrypted file securely deleted.")
+                        shred(input_file)
                         break
                     elif choice == 'n':
                         print("Encrypted file retained.")
@@ -193,24 +211,31 @@ Available commands:
                 print("Shredding cancelled.")
                 continue
             
-            shredder = Shredder()
+            shred(target)
+        elif command.startswith("cd "):
+            parts = command.split(maxsplit=1)
+            target_dir = parts[1].strip('"\'')
             try:
-                if os.path.isfile(target):
-                    loader = Loader("Shredding")
-                    loader.start()
-                    shredder.shred_file(target)
-                    loader.stop()
-                    print(f"File '{target}' securely deleted.")
-                elif os.path.isdir(target):
-                    loader = Loader("Shredding")
-                    loader.start()
-                    shredder.shred_directory(target)
-                    loader.stop()
-                    print(f"Directory '{target}' securely deleted.")
-                else:
-                    print(f"'{target}' is neither a file nor a directory.")
+                os.chdir(target_dir)
+                print(f"Changed directory to: {os.getcwd()}")
             except Exception as e:
-                print(f"Shredding failed: {e}")
+                print(f"cd failed: {e}")
+
+        elif command == "pwd":
+            print(os.getcwd())
+
+        elif command == "ls":
+            try:
+                for item in os.listdir():
+                    print(item)
+            except Exception as e:
+                print(f"ls failed: {e}")
+        
+        elif command == "clear":
+            os.system("cls" if os.name == "nt" else "clear")
+            print("\033[31m", end="")  # red text
+            print(spider_art)
+
 
         elif command == "e" or command == "d":
             print("Missing argument. Use 'e <folder>' or 'd <file>'.")
