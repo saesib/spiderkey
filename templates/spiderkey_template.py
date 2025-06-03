@@ -52,13 +52,6 @@ def shred(file_or_folder: str):
         loader.stop()
         print(f"Shredding failed: {e}")
 
-def path_completer(text, state):
-    matches = glob.glob(text + '*')
-    if state < len(matches):
-        return matches[state]
-    return None
-
-
 def main():
     spider_art = r'''
 ###############################################################
