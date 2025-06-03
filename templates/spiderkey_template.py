@@ -14,6 +14,12 @@ import base64
 from getpass import getpass
 from pathlib import Path
 
+# for adding the key to context menu
+import sys
+import tempfile
+import subprocess
+
+
 # --- BEGIN EMBEDDED CONSTANTS ---
 ENCRYPTED_AES_KEY_B64 = "{{ENCRYPTED_KEY}}"
 SALT_B64 = "{{SALT}}"
@@ -51,6 +57,8 @@ def shred(file_or_folder: str):
     except Exception as e:
         loader.stop()
         print(f"Shredding failed: {e}")
+
+
 
 def main():
     spider_art = r'''
@@ -96,6 +104,7 @@ Available commands:
   clear                 Clear the screen and redraw SpiderKey banner
   help                  Show this help message
   quit / q / exit       Exit the program
+  location              Show the full path to this SpiderKey
 """)
 
         elif command.startswith("e "):
@@ -229,6 +238,8 @@ Available commands:
             print("\033[31m", end="")  # red text
             print(spider_art)
 
+        elif command == "location":
+            print(f"This SpiderKey is located at:\n  {os.path.abspath(sys.argv[0])}")
 
         elif command == "e" or command == "d":
             print("Missing argument. Use 'e <folder>' or 'd <file>'.")
